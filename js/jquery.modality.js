@@ -82,6 +82,10 @@
             $.modality('close_all', 'esc', true);
           }
         });
+
+        $(window).scroll(function(e) {
+          $('#modality-wrapper').css('height', $(window).height() + $(window).scrollTop());
+        });
       }
     },
 
@@ -628,7 +632,7 @@
         }
       }
 
-      var top = 50;
+      var top = $(window).scrollTop() + 50;
       if (top < 5) {
         top = 5;
       }
