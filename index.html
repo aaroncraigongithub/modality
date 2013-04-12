@@ -217,36 +217,6 @@
         });
       </pre>
 
-      <h1>Callbacks</h1>
-      <pre>
-        $.modality({
-          title:        "The title",
-          content:      "The content",
-          onClose:      function(source) {
-            if (source == 'button') {
-              console.log("Clicked the close button");
-            }
-            if (source == 'x') {
-              console.log("Clicked the close x in upper corner");
-            }
-            if (source == 'esc') {
-              console.log("Hit the [esc] key");
-            }
-            if (source == 'click') {
-              console.log("Clicked outside the dialog");
-            }
-          },
-          onOpen: function() {
-            console.log('The modal has opened');
-          },
-          onLoad: function(el) {
-            console.log('The modal content has been loaded');
-
-            // el is the container in which the new content has been loaded
-          }
-        });
-      </pre>
-
       <h1>Instances</h1>
       <pre>
         // if a modal with the same configuration is loaded twice
@@ -374,6 +344,32 @@
         });
       </pre>
       <div class='modal' id='navigate-modal'>Try it</div>
+
+      <h1>Deferred opening</h1>
+      <p>
+        Create a dialog, and show it later
+      </p>
+      <pre>
+        $.modality({
+          title:        "The title",
+          content:      "This was created in $(document).ready and shown later.",
+          close_button: "Close me",
+          close_x:      false,
+          height:       500,
+          width:        500,
+          id:           'delayed-dialog',
+          autoShow:     false
+        });
+
+        $.modality('show', 'delayed-dialog');
+
+        // or
+        $('#my-el').modality({autoShow: false});
+
+        // later
+        $('#my-el').modality('show');
+      </pre>
+      <div class='modal' id='delayed-modal'>Try it</div>
 
     </div>
   </body>

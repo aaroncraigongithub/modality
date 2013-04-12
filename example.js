@@ -101,6 +101,20 @@
       });
     });
 
+    $.modality({
+      title:        "The title",
+      content:      "Content with <a href='#' id='another-modal'>another modal</a>",
+      close_button: "Close me",
+      close_x:      false,
+      height:       500,
+      width:        500,
+      id:           'delayed-dialog',
+      autoShow:     false
+    });
+
+    $('#delayed-modal').click(function() {
+      $.modality('show', 'delayed-dialog');
+    });
   });
 
 })(jQuery);

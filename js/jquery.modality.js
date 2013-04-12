@@ -222,9 +222,15 @@
      * Hide the given modal
      *
      */
-    close: function(source, hide_wrapper) {
+    close: function(source, hide_wrapper, id) {
       var $this = $(this);
-      var instance = $this.data('modality-instance');
+      var instance = null;
+      if (typeof id != 'undefined') {
+        instance = $.modality('get_instance_from_id', id);
+      }
+      else {
+        instance = $this.data('modality-instance');
+      }
 
       if (instance) {
         var ret = $.modality('call', 'onBeforeClose', instance, source);
@@ -286,9 +292,17 @@
      * Show the given modal
      *
      */
-    show: function() {
-      var $this = $(this);
-      var instance = $this.data('modality-instance');
+    show: function(id) {
+      var $this    = null
+      var instance = null;
+      if (typeof id != 'undefined') {
+        instance = $.modality('get_instance_from_id', id);
+        $this = instance.html;
+      }
+      else {
+        $this = $(this);
+        instance = $this.data('modality-instance');
+      }
 
       // set the new content, if necessary
       if (!instance.loaded) {
@@ -370,9 +384,15 @@
      * Set the modal title
      *
      */
-    set_title: function(title) {
+    set_title: function(title, id) {
       var $this = $(this);
-      var instance = $this.data('modality-instance');
+      var instance = null;
+      if (typeof id != 'undefined') {
+        instance = $.modality('get_instance_from_id', id);
+      }
+      else {
+        instance = $this.data('modality-instance');
+      }
 
       if (title) {
         instance.html.find('.message-title').html(title);
@@ -387,9 +407,15 @@
      * Set the modal close button
      *
      */
-    set_close_button: function(text) {
+    set_close_button: function(text, id) {
       var $this = $(this);
-      var instance = $this.data('modality-instance');
+      var instance = null;
+      if (typeof id != 'undefined') {
+        instance = $.modality('get_instance_from_id', id);
+      }
+      else {
+        instance = $this.data('modality-instance');
+      }
 
       if (text) {
         instance.html.find('.message-close-button').html(text);
@@ -404,9 +430,15 @@
      * Set the modal content
      *
      */
-    set_content: function(message) {
+    set_content: function(message, id) {
       var $this = $(this);
-      var instance = $this.data('modality-instance');
+      var instance = null;
+      if (typeof id != 'undefined') {
+        instance = $.modality('get_instance_from_id', id);
+      }
+      else {
+        instance = $this.data('modality-instance');
+      }
 
       instance.html.find('.message-content').html(message);
     },
