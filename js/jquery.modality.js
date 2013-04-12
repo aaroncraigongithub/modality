@@ -68,13 +68,13 @@
         $('#modality-wrapper').data('instances', []);
         $('#modality-wrapper').click(function(e) {
           if ($(e.target).is($(this))) {
-            $.modality('close_all', 'click', true);
+            $.modality('hide_all', 'click', true);
           }
         });
 
         $(document).keypress(function(e) {
           if ($('#modality-wrapper').hasClass('visible') && e.keyCode == 27) {
-            $.modality('close_all', 'esc', true);
+            $.modality('hide_all', 'esc', true);
           }
         });
       }
@@ -208,10 +208,10 @@
       message_div.html.data('modality-instance', message_div);
 
       message_div.html.find('.message-close-x').click(function(e) {
-        message_div.html.modality('close', 'x', true);
+        message_div.html.modality('hide', 'x', true);
       });
       message_div.html.find('.message-close-button').click(function() {
-        message_div.html.modality('close', 'button', true);
+        message_div.html.modality('hide', 'button', true);
       });
 
       return message_div;
@@ -222,7 +222,7 @@
      * Hide the given modal
      *
      */
-    close: function(source, hide_wrapper, id) {
+    hide: function(source, hide_wrapper, id) {
       var $this = $(this);
       var instance = null;
       if (typeof id != 'undefined') {
@@ -341,7 +341,7 @@
       // if we're visible, just position, slide current content away and replace
       if ($('#modality-wrapper').hasClass('visible')) {
         // hide any currently displayed modals
-        $.modality('close_all', 'replace', false);
+        $.modality('hide_all', 'replace', false);
       }
 
       // position the window
@@ -370,11 +370,11 @@
      * Close all modal windows
      *
      */
-    close_all: function(source, hide_wrapper) {
+    hide_all: function(source, hide_wrapper) {
       var instances = $('#modality-wrapper').data('instances');
       for (var i = 0; i < instances.length; i++) {
         if (instances[i].html.hasClass('visible')) {
-          instances[i].html.modality('close', source, hide_wrapper);
+          instances[i].html.modality('hide', source, hide_wrapper);
         }
       }
     },
