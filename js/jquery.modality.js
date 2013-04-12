@@ -12,18 +12,19 @@
      */
     init: function(cfg) {
       var config = $.extend({}, {
-        title:        '',
-        content:      '',
-        source:       '',
-        el:           '',
-        wait_message: 'Fetching content...',
-        close_button: '',
-        close_x:      true,
-        onClose:      null,
-        onOpen:       null,
-        autoShow:     true,
-        class:        '',
-        id:           'modality-' + $('.modality-instance').length
+        title:          '',
+        content:        '',
+        source:         '',
+        el:             '',
+        wait_message:   'Fetching content...',
+        close_button:   'OK',
+        close_x:        true,
+        onClose:        null,
+        onBeforeClose:  null,
+        onOpen:         null,
+        autoShow:       true,
+        class:          '',
+        id:             'modality-' + $('.modality-instance').length
       }, cfg);
 
       // ensure our wrapper is set up
@@ -98,6 +99,22 @@
 
     /*****************************************
      *
+     * Get a single instance from it's id value passed in config
+     *
+     */
+    get_instance_from_id: function(id) {
+      var instances = $('#modality-wrapper').data('instances');
+      for (var i = 0; i < instances.length; i++) {
+        if (instances[i].config.id == id) {
+          return instances[i];
+        }
+      }
+
+      return null;
+    },
+
+    /*****************************************
+     *
      * Append a single modal instance to the wrapper and return is as a jQuery object
      *
      */
@@ -154,6 +171,22 @@
     close: function(source, hide_wrapper) {
       var $this = $(this);
       var instance = $this.data('modality-instance');
+
+      if (instance.config.onBeforeClose) {
+        var ret = instance.config.onBeforeClose(source);
+
+        if (ret === false) {
+          return;
+        }
+
+        if (ret !== true) {
+          var next = $.modality('get_instance_from_id', ret);
+          if (next) {
+            next.html.modality('show');
+            return;
+          }
+        }
+      }
 
       if (instance) {
         instance.html.find('.message-close-x').removeClass('visible');
