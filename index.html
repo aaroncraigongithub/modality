@@ -1,0 +1,282 @@
+<html>
+  <head>
+    <title>JQuery Modality plugin demo and docs</title>
+    <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script src="http://code.jquery.com/ui/1.10.2/jquery-ui.min.js"></script>
+    <script src='js/jquery.modality.js'></script>
+    <script src='js/jquery.foggy.js'></script>
+    <script src='example.js'></script>
+
+    <link type="text/css" rel="stylesheet" media="screen" href="css/modality.css">
+
+    <style>
+      body {
+        background-color: #ccc;
+        color: black;
+      }
+
+      #content {
+        width: 80%;
+        margin: 0 auto;
+        background-color: #fff;
+        padding: 1em;
+      }
+
+      .modal {
+        border-radius: 5px;
+        background-color: #aaaaff;
+        padding: .5em 1.5em;
+        font-weight: bold;
+        display: inline;
+        cursor: pointer;
+      }
+
+      pre {
+        font-family: monospace;
+        background-color: #eee;
+        padding: 1.5em;
+        margin: 1.5em .75em;
+      }
+    </style>
+  </head>
+  <body>
+    <div id='content'>
+      <h1>Simple dialog</h1>
+      <pre>
+        $.modality({
+          title:        "The title",
+          content:      "The content",
+          close_button: "Close me"
+        });
+      </pre>
+      <div class='modal' id='simple-modal'>Try it</div>
+
+
+      <h1>More customization</h1>
+      <pre>
+        $.modality({
+          title:        "The title",
+          content:      "The content",
+          close_button: "Close me",
+          close_x:      false,
+          height:       500,
+          width:        500
+        });
+      </pre>
+      <div class='modal' id='configured-modal'>Try it</div>
+
+      <h1>Configuration</h1>
+      <p>
+        Any of the configuration settings may be set on an instance, or globally to effect all instances (unless overridden, of course).
+      </p>
+      <h2>Instance configuration</h2>
+      <pre>
+        $.modality({
+          title:        "The title",
+          content:      "The content",
+          close_button: "Close me",
+          close_x:      false,
+          height:       500,
+          width:        '80%'
+        });
+      </pre>
+      <h2>Global configuration</h2>
+      <pre>
+        $.modality('global', {
+          title:        "The title",
+          content:      "The content",
+          close_button: "Close me",
+          close_x:      false,
+          height:       500,
+          width:        '80%'
+        });
+      </pre>
+      <h2>Configuration setttings</h2>
+      <table>
+        <thead>
+            <tr>
+                <th>Property</th>
+                <th>Description</th>
+                <th>Default</th>
+            </tr>
+        </thead>
+        <tbody>
+          <tr>
+              <td>title</td>
+              <td>The title to display.  If empty, no title will display</td>
+              <td></td>
+          </tr>
+          <tr>
+              <td>content</td>
+              <td>The content of the dialog.  May be HTML or a jQuery or DOM object.</td>
+              <td></td>
+          </tr>
+          <tr>
+              <td>el</td>
+              <td>The selector of an existing element on the page to display as the content.</td>
+              <td></td>
+          </tr>
+          <tr>
+              <td>source</td>
+              <td>A URL that should be loaded as the content of the dialog.  Your server should return a JSON object that contains at least {status: 'OK', content: 'The modal content'}.  You may indicate an error on the server with {status: anything_but_OK, error: 'Some error message'}</td>
+              <td></td>
+          </tr>
+          <tr>
+              <td>wait_message</td>
+              <td>A message to display while the content loads.</td>
+              <td>Fetching content...</td>
+          </tr>
+          <tr>
+              <td>close_button</td>
+              <td>The text to display in the close button that by default appears in the bottom right of the dialog.  If no text is given, the element is not displayed.</td>
+              <td></td>
+          </tr>
+          <tr>
+              <td>close_x</td>
+              <td>Whether or not to show an 'x' in the top right which will close the dialog.</td>
+              <td>true</td>
+          </tr>
+          <tr>
+              <td>height</td>
+              <td>The height of the window.</td>
+              <td>auto</td>
+          </tr>
+          <tr>
+              <td>width</td>
+              <td>The width of the window.</td>
+              <td>auto</td>
+          </tr>
+          <tr>
+              <td>onClose</td>
+              <td>A function to call when the window is closed.  Gets one parameter, a string indicating how the user closed the window, whether they clicked on the close 'button', 'click'ed outside the modal box, clicked the 'x' close button, hit the 'esc' key, or if the window was 'replace'd by another.</td>
+              <td></td>
+          </tr>
+          <tr>
+              <td>onOpen</td>
+              <td>A function to call when the window is opened.</td>
+              <td></td>
+          </tr>
+          <tr>
+              <td>onLoad</td>
+              <td>A function to call when the window content is loaded.  Receives two parameters, the jQuery element that contains the new content, and the data returned from the server.</td>
+              <td></td>
+          </tr>
+          <tr>
+              <td>autoShow</td>
+              <td>Whether or not to show the window automatically.  If false, the caller must call the $.modality('open') function to display this modal.</td>
+              <td>true</td>
+          </tr>
+          <tr>
+              <td>class</td>
+              <td>A space delimited string of classes to attach to the modal content container.</td>
+              <td></td>
+          </tr>
+          <tr>
+              <td>id</td>
+              <td>A unique id for this modal, mostly useful for customizing the CSS for a specific modal.</td>
+              <td>auto generated</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h1>Callbacks</h1>
+      <pre>
+        $.modality({
+          title:        "The title",
+          content:      "The content",
+          onClose:      function(source) {
+            if (source == 'button') {
+              console.log("Clicked the close button");
+            }
+            if (source == 'x') {
+              console.log("Clicked the close x in upper corner");
+            }
+            if (source == 'esc') {
+              console.log("Hit the [esc] key");
+            }
+            if (source == 'click') {
+              console.log("Clicked outside the dialog");
+            }
+          },
+          onOpen: function() {
+            console.log('The modal has opened');
+          },
+          onLoad: function(el) {
+            console.log('The modal content has been loaded');
+
+            // el is the container in which the new content has been loaded
+          }
+        });
+      </pre>
+
+      <h1>Instances</h1>
+      <pre>
+        // if a modal with the same configuration is loaded twice
+        // it doesn't reload it's content
+        $.modality({
+          title:       "The title",
+          source:      "http://example.com/get-json"
+        });
+        $.modality({
+          title:       "The title",
+          source:      "http://example.com/get-json"
+        });
+
+        // You can also open multiple ones, and they play nice
+        $.modality({
+          title:       "The title",
+          source:      "http://example.com/get-json"
+        });
+        $.modality({
+          title:       "A new modal",
+          content:     "This content replaces existing content"
+        });
+
+      </pre>
+
+      <h1>Content sources</h1>
+      <pre>
+        // from code
+        $.modality({
+          title:        "The title",
+          content:      "The content"
+        });
+
+        $.modality('update_content', 'New content');
+
+        // from an existing element
+        $('#modal').modality({title: 'The title'});
+        $.modality({
+          title:       "The title",
+          el:          "#modal"
+        });
+
+        // from a URL
+        $.modality({
+          title:       "The title",
+          source:      "http://example.com/get-json"
+        });
+      </pre>
+
+      <h1>Transitions</h1>
+      <p>
+        Modality handles multiple dialogues in the same window, and creates a nice
+        transition between them on multiple calls.
+      </p>
+      <pre>
+        $.modality({
+          title:        "The title",
+          content:      "The content"
+        });
+
+        $.modality({
+          title:        "New title",
+          content:      "New content"
+        });
+
+        // the first content slides away to be replaced by the new content
+      </pre>
+      <div class='modal' id='multiple-modal'>Try it</div>
+    </div>
+  </body>
+</html>
