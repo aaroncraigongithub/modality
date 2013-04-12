@@ -11,6 +11,10 @@
      *
      */
     init: function(cfg) {
+      $.modality('create_wrapper');
+
+      var global_config = $('#modality-wrapper').data('global-config');
+
       var config = $.extend({}, {
         title:          '',
         content:        '',
@@ -25,25 +29,8 @@
         autoShow:       true,
         class:          '',
         id:             'modality-' + $('.modality-instance').length
-      }, cfg);
+      }, global_config, cfg);
 
-      // ensure our wrapper is set up
-      if ($('#modality-wrapper').length == 0) {
-        $('body').append('<div id="modality-wrapper"><div id="modality-content" />');
-
-        $('#modality-wrapper').data('instances', []);
-        $('#modality-wrapper').click(function(e) {
-          if ($(e.target).is($(this))) {
-            $.modality('close_all', 'click', true);
-          }
-        });
-
-        $(document).keypress(function(e) {
-          if ($('#modality-wrapper').hasClass('visible') && e.keyCode == 27) {
-            $.modality('close_all', 'esc', true);
-          }
-        });
-      }
 
       var els = this;
       if (typeof this == 'function') {
@@ -72,6 +59,73 @@
       }
 
       return els;
+    },
+
+    create_wrapper: function() {
+      if ($('#modality-wrapper').length == 0) {
+        $('body').append('<div id="modality-wrapper"><div id="modality-content" /></div>');
+
+        $('#modality-wrapper').data('instances', []);
+        $('#modality-wrapper').click(function(e) {
+          if ($(e.target).is($(this))) {
+            $.modality('close_all', 'click', true);
+          }
+        });
+
+        $(document).keypress(function(e) {
+          if ($('#modality-wrapper').hasClass('visible') && e.keyCode == 27) {
+            $.modality('close_all', 'esc', true);
+          }
+        });
+      }
+    },
+
+    call: function(event, instance) {
+      var ret = null;
+      if (instance.config[event]) {
+        ret = instance.config[event].apply(instance.html, Array.prototype.slice.call(arguments, 2));
+
+        if (ret !== null) {
+          return ret;
+        }
+      }
+
+      var global_callback = $.modality('global', event);
+      if (global_callback) {
+        return global_callback.apply(instance.html, Array.prototype.slice.call(arguments, 2));
+      }
+
+      return null;
+    },
+
+    /*****************************************
+     *
+     * Set/get global configuration
+     *
+     */
+    global: function(key, value) {
+      $.modality('create_wrapper');
+
+      if (typeof key == 'object') {
+        $('#modality-wrapper').data('global-config', key);
+      }
+      if (typeof key == 'string') {
+        var existing = $('#modality-wrapper').data('global-config');
+        if (!existing) {
+          return null;
+        }
+
+        if (typeof value != 'undefined') {
+          existing[key] = value;
+          $('#modality-wrapper').data('global-config', existing);
+          return value;
+        }
+        else {
+          return existing[key];
+        }
+      }
+
+      return key;
     },
 
     /*****************************************
@@ -172,9 +226,8 @@
       var $this = $(this);
       var instance = $this.data('modality-instance');
 
-      if (instance.config.onBeforeClose) {
-        var ret = instance.config.onBeforeClose(source);
-
+      if (instance) {
+        var ret = $.modality('call', 'onBeforeClose', instance, source);
         if (ret === false) {
           return;
         }
@@ -186,9 +239,7 @@
             return;
           }
         }
-      }
 
-      if (instance) {
         instance.html.find('.message-close-x').removeClass('visible');
 
         // make sure the container doesn't disappear
@@ -197,9 +248,7 @@
         instance.html.hide('slide', function() {
           instance.html.removeClass('visible');
 
-          if (instance.config.onClose) {
-            instance.config.onClose(source);
-          }
+          $.modality('call', 'onClose', instance, source);
 
           if (hide_wrapper) {
             $.modality('hide_wrapper');
@@ -253,9 +302,7 @@
           $this.modality('set_content', content);
 
           instance.loaded = true;
-          if (instance.config.onLoad) {
-            instance.config.onLoad(instance.html, content);
-          }
+          $.modality('call', 'onLoad', instance, instance.html, content);
         }
         else if (instance.config.source) {
           $this.modality('set_content', instance.config.wait_message);
@@ -266,9 +313,7 @@
             if (data.status == 'OK') {
               $this.modality('set_content', data.content);
               instance.loaded = true;
-              if (instance.config.onLoad) {
-                instance.config.onLoad(instance.html, data);
-              }
+              $.modality('call', 'onLoad', instance, instance.html, data.content);
             }
             else {
               $this.modality('set_title', data.status);
@@ -297,9 +342,7 @@
         instance.html.show('slide', function() {
           $(this).addClass('visible');
 
-          if (instance.config.onOpen) {
-            instance.config.onOpen();
-          }
+          $.modality('call', 'onOpen', instance);
 
           if (instance.config.close_x) {
             instance.html.find('.message-close-x').addClass('visible');

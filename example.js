@@ -21,6 +21,23 @@
       });
     });
 
+    $('#global-modal').click(function() {
+      $.modality('global', {
+        onClose: function(source) {
+          console.log("global close called from " + source);
+        }
+      });
+
+      $.modality({
+        title:        "The title",
+        content:      "The content",
+        close_button: "Close me",
+        close_x:      false,
+        height:       500,
+        width:        500
+      });
+    });
+
     $('#multiple-modal').click(function() {
       $.modality({
         title:        "The title",

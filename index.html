@@ -77,20 +77,28 @@
           close_button: "Close me",
           close_x:      false,
           height:       500,
-          width:        '80%'
+          width:        500
         });
       </pre>
       <h2>Global configuration</h2>
       <pre>
         $.modality('global', {
+          onClose: function(source) {
+            console.log("global close called from " + source);
+          }
+        });
+
+        $.modality({
           title:        "The title",
           content:      "The content",
           close_button: "Close me",
           close_x:      false,
           height:       500,
-          width:        '80%'
+          width:        500
         });
       </pre>
+      <div class='modal' id='global-modal'>Try it</div>
+
       <h2>Configuration setttings</h2>
       <table>
         <thead>
@@ -178,6 +186,36 @@
           </tr>
         </tbody>
       </table>
+
+      <h1>Callbacks</h1>
+      <pre>
+        $.modality({
+          title:        "The title",
+          content:      "The content",
+          onClose:      function(source) {
+            if (source == 'button') {
+              console.log("Clicked the close button");
+            }
+            if (source == 'x') {
+              console.log("Clicked the close x in upper corner");
+            }
+            if (source == 'esc') {
+              console.log("Hit the [esc] key");
+            }
+            if (source == 'click') {
+              console.log("Clicked outside the dialog");
+            }
+          },
+          onOpen: function() {
+            console.log('The modal has opened');
+          },
+          onLoad: function(el) {
+            console.log('The modal content has been loaded');
+
+            // el is the container in which the new content has been loaded
+          }
+        });
+      </pre>
 
       <h1>Callbacks</h1>
       <pre>
@@ -322,8 +360,13 @@
                     return false;
                   }
 
-                  // otherwise, close normally
-                  return true;
+                  // allow clicking on the 'x'
+                  if (source == 'x') {
+                    return true;
+                  }
+
+                  // otherwise, pass and let a global handler deal with it
+                  return null;
                 }
               });
             });
