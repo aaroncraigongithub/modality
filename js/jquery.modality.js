@@ -26,6 +26,8 @@
         onClose:        null,
         onBeforeClose:  null,
         onOpen:         null,
+        onLoad:         null,
+        onBeforeLoad:   null,
         autoShow:       true,
         class:          '',
         id:             'modality-' + $('.modality-instance').length
@@ -68,13 +70,16 @@
         $('#modality-wrapper').data('instances', []);
         $('#modality-wrapper').click(function(e) {
           if ($(e.target).is($(this))) {
-            $.modality('hide_all', 'click', true);
+            $.modality('close_all', 'click', true);
           }
         });
 
+        $('#modality-wrapper').data('stack', []);
+        $('#modality-wrapper').data('current', -1);
+
         $(document).keypress(function(e) {
           if ($('#modality-wrapper').hasClass('visible') && e.keyCode == 27) {
-            $.modality('hide_all', 'esc', true);
+            $.modality('close_all', 'esc', true);
           }
         });
       }
@@ -169,6 +174,66 @@
 
     /*****************************************
      *
+     * Get the stack index for this instance
+     *
+     */
+    get_stack_index_from_id: function(id) {
+      var stack = $('#modality-wrapper').data('stack');
+      for (var i = 0; i < stack.length; i++) {
+        if (stack[i] == id) {
+          return i;
+        }
+      }
+
+      return -1;
+    },
+
+    /*****************************************
+     *
+     * Add an instance to the stack
+     *
+     */
+    add_to_stack: function(id) {
+      if ($.modality('get_stack_index_from_id', id) > -1) {
+        return;
+      }
+
+      var stack = $('#modality-wrapper').data('stack');
+      stack.push(id);
+      $('#modality-wrapper').data('stack', stack);
+    },
+
+    /*****************************************
+     *
+     * Get the id of the next instance in the stack relative to the given index
+     *
+     */
+    get_stack_position: function(index, direction) {
+      var stack = $('#modality-wrapper').data('stack');
+      if (stack.length == 0) {
+        return null;
+      }
+
+      if (direction == 'first') {
+        return stack[0];
+      }
+      if (direction == 'last') {
+        return stack[stack.length - 1];
+      }
+      if (direction == 'prev') {
+        var next = index - 1;
+        return (next < stack.length)? stack[next] : null;
+      }
+      if (direction == 'next') {
+        var next = index + 1;
+        return (next < stack.length)? stack[next] : null;
+      }
+
+      return null;
+    },
+
+    /*****************************************
+     *
      * Append a single modal instance to the wrapper and return is as a jQuery object
      *
      */
@@ -208,10 +273,10 @@
       message_div.html.data('modality-instance', message_div);
 
       message_div.html.find('.message-close-x').click(function(e) {
-        message_div.html.modality('hide', 'x', true);
+        message_div.html.modality('close', 'x', true);
       });
       message_div.html.find('.message-close-button').click(function() {
-        message_div.html.modality('hide', 'button', true);
+        message_div.html.modality('close', 'button', true);
       });
 
       return message_div;
@@ -222,13 +287,34 @@
      * Hide the given modal
      *
      */
-    hide: function(source, hide_wrapper, id) {
-      var $this = $(this);
+    hide: function(id, source) {
+      var $this    = null
       var instance = null;
       if (typeof id != 'undefined') {
         instance = $.modality('get_instance_from_id', id);
+        $this = instance.html;
       }
       else {
+        $this = $(this);
+        instance = $this.data('modality-instance');
+      }
+
+      if (typeof source == 'undefined') {
+        source = 'code';
+      }
+
+      instance.html.modality('close', source, true);
+    },
+
+    close: function(source, hide_wrapper, id) {
+      var $this    = null
+      var instance = null;
+      if (typeof id != 'undefined') {
+        instance = $.modality('get_instance_from_id', id);
+        $this = instance.html;
+      }
+      else {
+        $this = $(this);
         instance = $this.data('modality-instance');
       }
 
@@ -239,7 +325,13 @@
         }
 
         if (ret !== true) {
-          var next = $.modality('get_instance_from_id', ret);
+          var next_id = ret;
+          if (ret == 'prev' || ret == 'next' || ret == 'first' || ret == 'last') {
+            var index  = $.modality('get_stack_index_from_id', instance.config.id);
+            next_id    = $.modality('get_stack_position', index, ret);
+          }
+
+          var next = $.modality('get_instance_from_id', next_id);
           if (next) {
             next.html.modality('show');
             return;
@@ -265,6 +357,27 @@
         if (hide_wrapper) {
           $.modality('hide_wrapper');
         }
+      }
+    },
+
+    /*****************************************
+     *
+     * Go to the previously shown modal, relative to the given modal.
+     * If id is omitted, shows previous to the last shown
+     */
+    prev: function(id) {
+      if (typeof id == 'undefined') {
+        id = $('#modality-wrapper').data('current');
+      }
+
+      var this_index  = $.modality('get_stack_index_from_id', id);
+      var next_id     = $.modality('get_stack_position', this_index, 'prev');
+
+      if (next_id) {
+        $.modality('show', next_id);
+      }
+      else {
+        $.modality('close_all', 'code', true);
       }
     },
 
@@ -313,10 +426,11 @@
         if (instance.config.content || instance.config.el) {
           var content = (instance.config.content)? instance.config.content : instance.config.el.html();
 
-          $this.modality('set_content', content);
+          var changed = $.modality('call', 'onBeforeLoad', instance, content);
+          $this.modality('set_content', (changed)? changed : content);
 
           instance.loaded = true;
-          $.modality('call', 'onLoad', instance, instance.html, content);
+          $.modality('call', 'onLoad', instance, instance.html, (changed)? changed : content);
         }
         else if (instance.config.source) {
           $this.modality('set_content', instance.config.wait_message);
@@ -325,9 +439,10 @@
           $.getJSON(instance.config.source, function(data) {
             instance.html.removeClass('spinner');
             if (data.status == 'OK') {
-              $this.modality('set_content', data.content);
+              var changed = $.modality('call', 'onBeforeLoad', instance, data.content);
+              $this.modality('set_content', (changed)? changed : data.content);
               instance.loaded = true;
-              $.modality('call', 'onLoad', instance, instance.html, data.content);
+              $.modality('call', 'onLoad', instance, instance.html, (changed)? changed : data.content);
             }
             else {
               $this.modality('set_title', data.status);
@@ -341,7 +456,7 @@
       // if we're visible, just position, slide current content away and replace
       if ($('#modality-wrapper').hasClass('visible')) {
         // hide any currently displayed modals
-        $.modality('hide_all', 'replace', false);
+        $.modality('close_all', 'replace', false);
       }
 
       // position the window
@@ -350,6 +465,9 @@
       // ensure the wrapper is visible
       $('#modality-wrapper').addClass('visible');
       $('body > *:not(#modality-wrapper)').addClass('modality-blurred');
+
+      $.modality('add_to_stack', instance.config.id);
+      $('#modality-wrapper').data('current', instance.config.id);
 
       // position the window for new content
       $.modality('show_modal', function() {
@@ -370,11 +488,11 @@
      * Close all modal windows
      *
      */
-    hide_all: function(source, hide_wrapper) {
+    close_all: function(source, hide_wrapper) {
       var instances = $('#modality-wrapper').data('instances');
       for (var i = 0; i < instances.length; i++) {
         if (instances[i].html.hasClass('visible')) {
-          instances[i].html.modality('hide', source, hide_wrapper);
+          instances[i].html.modality('close', source, hide_wrapper);
         }
       }
     },
@@ -385,12 +503,14 @@
      *
      */
     set_title: function(title, id) {
-      var $this = $(this);
+      var $this    = null
       var instance = null;
       if (typeof id != 'undefined') {
         instance = $.modality('get_instance_from_id', id);
+        $this = instance.html;
       }
       else {
+        $this = $(this);
         instance = $this.data('modality-instance');
       }
 
@@ -408,12 +528,14 @@
      *
      */
     set_close_button: function(text, id) {
-      var $this = $(this);
+      var $this    = null
       var instance = null;
       if (typeof id != 'undefined') {
         instance = $.modality('get_instance_from_id', id);
+        $this = instance.html;
       }
       else {
+        $this = $(this);
         instance = $this.data('modality-instance');
       }
 
@@ -431,12 +553,14 @@
      *
      */
     set_content: function(message, id) {
-      var $this = $(this);
+      var $this    = null
       var instance = null;
       if (typeof id != 'undefined') {
         instance = $.modality('get_instance_from_id', id);
+        $this = instance.html;
       }
       else {
+        $this = $(this);
         instance = $this.data('modality-instance');
       }
 
@@ -475,7 +599,7 @@
         }
       }
 
-      var top = $(window).height() * .1;
+      var top = 50;
       if (top < 5) {
         top = 5;
       }

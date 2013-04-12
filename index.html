@@ -371,6 +371,131 @@
       </pre>
       <div class='modal' id='delayed-modal'>Try it</div>
 
+      <h1>Hide from code</h1>
+      <p>
+        You can also hide the modal following some other logic.
+      </p>
+      <pre>
+        $.modality({
+          title:        "The title",
+          content:      "This will close from code when you <a href='#'>click here</a>.",
+          close_x:      false,
+          height:       500,
+          width:        500,
+          id:           'code-close-dialog',
+          close_button: false,
+          onBeforeClose: function() {
+            return false;
+          },
+          onLoad: function(el, content) {
+            el.find('a').click(function(e) {
+              e.preventDefault();
+
+              $.modality('hide', 'code-close-dialog');
+            });
+          }
+        });
+      </pre>
+      <div class='modal' id='code-close-modal'>Try it</div>
+
+      <h1>Alter content before it's displayed</h1>
+      <pre>
+        $.modality({
+          title:        "The title",
+          content:      "This content will be altered before it's displayed",
+          height:       500,
+          width:        500,
+          onBeforeLoad: function(content) {
+            return "<p>" + content + "</p><p>This text has been added</p>";
+          }
+        });
+      </pre>
+      <div class='modal' id='before-load-modal'>Try it</div>
+
+      <h1>Navigation</h1>
+      <p>
+        You can traverse various modals by called 'prev', 'next', 'first' and 'last'.
+      </p>
+      <pre>
+        $.modality({
+            title:        "The title",
+            content:      "The content",
+            close_button: "Close me"
+          });
+        });
+
+        $('#configured-modal').click(function() {
+          $.modality({
+            title:        "The title",
+            content:      "The content",
+            close_button: "Close me",
+            close_x:      false,
+            height:       500,
+            width:        500
+          });
+        });
+
+        $('#navigation-modal').click(function() {
+          $.modality({
+            title:        "first",
+            content:      "This is the first.",
+            height:       500,
+            width:        500,
+            autoShow:     false,
+            id:           'navigation-1',
+            close_button: 'close'
+          });
+          $.modality({
+            title:        "second",
+            content:      "This is the second",
+            height:       500,
+            width:        500,
+            autoShow:     false,
+            close_button: 'back',
+            id:           'navigation-2',
+            onBeforeClose: function(source) {
+              if (source == 'button') {
+                return 'prev';
+              }
+
+              return null;
+            }
+          });
+          $.modality({
+            title:        "third",
+            content:      "This is the third",
+            height:       500,
+            width:        500,
+            autoShow:     false,
+            close_button: 'back',
+            id:           'navigation-3',
+            onBeforeClose: function(source) {
+              if (source == 'button') {
+                return 'prev';
+              }
+
+              return null;
+            }
+          });
+          $.modality({
+            title:        "fourth",
+            content:      "This is the fourth",
+            height:       500,
+            width:        500,
+            autoShow:     false,
+            close_button: 'back',
+            id:           'navigation-4',
+            onBeforeClose: function(source) {
+              if (source == 'button') {
+                return 'prev';
+              }
+
+              return null;
+            }
+          });
+      </pre>
+      <div class='modal' id='navigation-modal'>Try it</div>
+
     </div>
   </body>
 </html>
