@@ -141,14 +141,43 @@
     get_instance: function(config) {
       var instances = $('#modality-wrapper').data('instances');
       for (var i = 0; i < instances.length; i++) {
-        var test = $.extend(true, {}, instances[i].config);
+        var test_a = $.extend(true, {}, instances[i].config);
+        var test_b = $.extend(true, {}, config);
 
-        // will never match if the id was auto-generated
-        if (test.id.match(/^modality-/)) {
-          test.id = config.id;
+        // first just check by id
+        if (test_a.id == test_b.id) {
+          return instances[i];
         }
 
-        if (JSON.stringify(test) == JSON.stringify(config)) {
+        // if content is an object and equal, these are the same
+        if (typeof(test_a.content) == 'object' && typeof(test_b.content) == 'object') {
+          // assume jQuery objects
+          if (test_a.is && test_a.is(test_b)) {
+            // just in case two different configurations point to the same element
+            test_a.content = test_b.content = 'x';
+          }
+        }
+
+        // el is necessarily a jQuery object or selector
+        if (test_a.el && test_b.el) {
+          if ($(test_a).is($(test_b))) {
+            test_a.content = test_b.content = 'x';
+          }
+        }
+
+        // if we've gotten this far, it's possible the id was auto-generated, so equalize
+        if (test_a.id.match(/^modality-/)) {
+          test_a.id = test_b.id;
+        }
+
+        // any properties that could be objects would have matched by now, so
+        // remove them so that we don't get circular structure errors when we stringify
+        if (typeof test_a.content == 'object') { test_a.content = 'a' }
+        if (typeof test_b.content == 'object') { test_a.content = 'b' }
+        if (typeof test_a.el == 'object') { test_a.el = 'a' }
+        if (typeof test_b.el == 'object') { test_b.el = 'b' }
+
+        if (JSON.stringify(test_a) == JSON.stringify(test_b)) {
           return instances[i];
         }
       }

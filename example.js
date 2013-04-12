@@ -157,6 +157,8 @@
 
         onLoad: function(el) {
           el.find('#another-modal').click(function(e) {
+            e.preventDefault();
+
             $.modality({
               title:        "Another modal!",
               content:      "This is so cool!",
@@ -211,7 +213,7 @@
 
     $.modality({
       title:        "The title",
-      content:      "Content with <a href='#' id='another-modal'>another modal</a>",
+      content:      "This was created on $(document).ready and shown when you clicked the button",
       close_button: "Close me",
       close_x:      false,
       height:       500,
