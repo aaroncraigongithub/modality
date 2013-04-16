@@ -527,8 +527,10 @@
      *
      */
     close_all: function(source, hide_wrapper) {
-      $('#modality-wrapper').data('stack', []);
-      $('#modality-wrapper').data('current', -1);
+      if (source == 'button' || source == 'esc' || source == 'x') {
+        $('#modality-wrapper').data('stack', []);
+        $('#modality-wrapper').data('current', -1);
+      }
 
       var instances = $('#modality-wrapper').data('instances');
       for (var i = 0; i < instances.length; i++) {
