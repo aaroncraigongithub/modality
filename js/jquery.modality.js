@@ -527,7 +527,7 @@
      *
      */
     close_all: function(source, hide_wrapper) {
-      if (source == 'button' || source == 'esc' || source == 'x') {
+      if (source == 'button' || source == 'esc' || source == 'x' || source == 'click') {
         $('#modality-wrapper').data('stack', []);
         $('#modality-wrapper').data('current', -1);
       }
