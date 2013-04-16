@@ -11,7 +11,7 @@
   -ms-filter: blur(3px); }
 
 #modality-wrapper {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   height: 0;

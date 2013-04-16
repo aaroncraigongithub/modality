@@ -379,16 +379,14 @@
         instance.html.hide('slide', function() {
           instance.html.removeClass('visible');
 
-          $.modality('call', 'onClose', instance, source);
-
           if (hide_wrapper) {
-            $.modality('hide_wrapper');
+            $.modality('hide_wrapper', source);
           }
         });
       }
       else {
         if (hide_wrapper) {
-          $.modality('hide_wrapper');
+          $.modality('hide_wrapper', source);
         }
       }
     },
@@ -419,7 +417,7 @@
      * Hide the wrapper if no other modals are showing
      *
      */
-    hide_wrapper: function() {
+    hide_wrapper: function(source) {
       var instances = $('#modality-wrapper').data('instances');
       for (var i = 0; i < instances.length; i++) {
         if (instances[i].html.hasClass('visible')) {
@@ -427,10 +425,17 @@
         }
       }
 
+
+      // nothing left open, so close
+      for (var i = 0; i < instances.length; i++) {
+        $.modality('call', 'onClose', instances[i], source);
+      }
+
       $.modality('hide_modal', function() {
         $('#modality-wrapper').removeClass('visible');
         $('body > *:not(#modality-wrapper)').removeClass('modality-blurred');
       });
+
     },
 
     /*****************************************
@@ -522,6 +527,9 @@
      *
      */
     close_all: function(source, hide_wrapper) {
+      $('#modality-wrapper').data('stack', []);
+      $('#modality-wrapper').data('current', -1);
+
       var instances = $('#modality-wrapper').data('instances');
       for (var i = 0; i < instances.length; i++) {
         if (instances[i].html.hasClass('visible')) {

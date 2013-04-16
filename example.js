@@ -110,7 +110,7 @@
     $('#code-close-modal').click(function() {
       $.modality({
         title:        "The title",
-        content:      "This will close from code when you <a href='#'>click here</a>.",
+        content:      "This will close from code when you <a id='click-this' href='#'>click here</a>.",
         close_x:      false,
         close_button: false,
         height:       500,
@@ -120,7 +120,7 @@
           return source == 'code';
         },
         onLoad: function(el, content) {
-          el.find('a').click(function(e) {
+          el.find('a#click-this').click(function(e) {
             e.preventDefault();
 
             $.modality('hide', 'code-close-dialog');
@@ -155,7 +155,7 @@
         height:       500,
         width:        500,
 
-        onLoad: function(el) {
+        onLoad: function(el, content) {
           el.find('#another-modal').click(function(e) {
             e.preventDefault();
 
@@ -174,8 +174,8 @@
 
     $('#navigate-modal').click(function() {
       $.modality({
-        title:        "The title",
-        content:      "Content with <a href='#' id='another-modal'>another modal</a>",
+        title:        "The first one",
+        content:      "Content with <a href='#' id='nav-modal'>another modal</a>",
         close_button: "Close me",
         close_x:      false,
         height:       500,
@@ -183,10 +183,10 @@
         id:           'first-dialog',
 
         onLoad: function(el) {
-          el.find('#another-modal').click(function(e) {
+          el.find('#nav-modal').click(function(e) {
             $.modality({
-              title:        "Another modal!",
-              content:      "This is so cool!",
+              title:        "A new modal!",
+              content:      "This is righteous!",
               close_button: "Back",
               close_x:      false,
               height:       800,
